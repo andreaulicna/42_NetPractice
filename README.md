@@ -92,8 +92,8 @@ Starting state
 Solution:
 - since host C has a subnet mask set and all the hosts are on the same network, their subnet masks should be the same - either ```255.255.255.128``` or ```/27```
 - given that it is the last 7 bits that represent the host address, the solution for host A and host B addresses can be any address between ```.01100000``` and ```.01111111``` in binary which translates to address between ```104.198.152.96``` and ```104.198.152.127```, except:
-	-```104.198.152.96```: represents the network address
-	-```104.198.152.127```: represents the broadcast address
-	-```104.198.152.125```: already taken by host A
+	- ```104.198.152.96```: represents the network address
+	- ```104.198.152.127```: represents the broadcast address
+	- ```104.198.152.125```: already taken by host A
 
 </details>
