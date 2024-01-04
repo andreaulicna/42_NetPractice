@@ -83,17 +83,118 @@ Solution:
 <details>
 <summary>Level 3</summary>
 
-Starting state
+##### Starting state
 - hosts A, B and C are all on the same network, connected via a switch
 - host C's subnet mask is ```255.255.255.128``` which translates to ```11111111.11111111.11111111.10000000``` in binary and therefore means that:
 	- the first 25 bits represent the network address
 	- the last 7 bits represent the host address
 
-Solution:
-- since host C has a subnet mask set and all the hosts are on the same network, their subnet masks should be the same - either ```255.255.255.128``` or ```/27```
-- given that it is the last 7 bits that represent the host address, the solution for host A and host B addresses can be any address between ```.01100000``` and ```.01111111``` in binary which translates to address between ```104.198.152.96``` and ```104.198.152.127```, except:
-	- ```104.198.152.96```: represents the network address
+##### Solution
+- since host C has a subnet mask set and all the hosts are on the same network, their subnet masks should be the same - either ```255.255.255.128``` or ```/25```
+- given that it is the last 7 bits that represent the host address, the solution for host A and host B addresses can be any address between ```.00000000``` and ```.01111111``` in binary which translates to an address between ```104.198.152.0``` and ```104.198.152.127```, except:
+	- ```104.198.152.0```: represents the network address
 	- ```104.198.152.127```: represents the broadcast address
 	- ```104.198.152.125```: already taken by host A
 
+</details>
+
+<details>
+<summary>Level 4</summary>
+
+##### Starting state
+- host A and B are on the same network, connected via a switch
+- the switch also connects route R with them
+	- a route connects multiple networks together, doing so via interefaces for each
+- we need to take care only of the communication happening between the router Interface R1 and those of hosts (Interface A1 and Interface B1), so within one network
+
+##### Solution
+-  interface R1, A1 nor B1 has a mask setup, and so the choice is on us
+	- for simplicity, a mask of increments of 8 can be used as it won't require binary calculation to find the range of suitable addresses
+	- mask of ```255.255.0.0``` or ```/16``` can, therefore, do
+- interface A1 has an IP address specified and so the first 2 bytes of addresses for Interface B1 and R1 should follow it
+	- therefore, their addresses can be any between ```72.96.0.0``` and ```72.96.255.255``` expect:
+		- ```72.96.0.0```: represents the network address
+		- ```72.96.255.255```: represents the broadcast address
+		- ```72.96.116.132```: already taken by interface A1
+
+</details>
+
+<details>
+<summary>Level 5</summary>
+
+##### Theory
+- interfaces A1 and B1 have routing tables to be completed with:
+	- destination:
+		- speficies the network address the host is on
+		- ```default``` or ```0.0.0.0/0``` address is the route taken when there is no IP destination address provided, sending the packets via the next-hop address
+	- next-hop:
+		- refers to the closest router (it's IP address) the packets can go via
+
+##### Solution
+###### Goal 1
+- interface R1 and A1 are on the same network and therefore need to have the same subnet mask of ```255.255.255.128```
+- that subnet mask defines that the host address is represented by the last 7 bits (126 in binary is 01111110) and so is between ```.00000000``` and ```01111111``` in binary, translating to between ```18.143.35.0``` and ```18.143.35.127``` in decimal, except:
+	- ```18.143.35.0```: represents the network address
+	- ```18.143.35.127```: represents the broadcast address
+	- ```18.143.35.126```: already taken by interface R1
+
+###### Goal 2
+- interface R2 and B1 are on the same network and therefore need to have the same subnet mask of ```255.255.192.0```
+- that subnet mask defines that the host address is represented by the last 14 bits (192 = 11000000, 254 = 11111110) and so is between ```.11000000.00000000``` and ```.11111111.11111111``` in binary, translating to between ```153.192.192.0``` and ```153.192.255.255``` in decimal, except:
+	- ```153.192.192.0```: represents the network address
+	- ```153.192.255.255```: represents the broadcast address
+	- ```153.192.192.254```: already taken by the interface R2
+
+###### Goal 3
+- since there is only one route that both, A1 and B1, interfaces can send packets via saying ```default``` or ```0.0.0.0/0``` is enough
+- the next-hop address needs to equal the IP address of the closest route
+
+</details>
+
+<details>
+<summary>Level 6</summary>
+
+##### Theory
+- internet behaves like a router
+- yet, if an interface is directly or indirectly connected to the internet, its address cannot have the following reserved private IP ranges:
+```
+192.168.0.0 - 192.168.255.255 (65,536 IP addresses)
+172.16.0.0 - 172.31.255.255   (1,048,576 IP addresses)
+10.0.0.0 - 10.255.255.255     (16,777,216 IP addresses)
+``` 
+
+##### Solution
+- match host A's subnet mask to that of the router
+- get host masks of interface R1: the subnet mask defines that the host address is defined by the last 7 bits (128 = 10000000, 227 = 11100011) and so is between ```.10000000``` and ```.11111111``` in binary translating to ```75.221.134.128``` and ```75.221.134.255``` in decimal, except:
+	- ```75.221.134.128```: represents the network address
+	- ```75.221.134.255```: represents the broadcast address
+	- ```75.221.134.227```: already taken by host A 
+- match next-hop of host A to the router's IP address
+- reset the destination of router to default
+- set the internet's destination to the network address of host A (calculated in the first step), including the subnet mask in / slash notation (/25) 
+
+</details>
+
+<details>
+<summary>Level 7</summary>
+
+##### Theory
+- different networks have different ranges of IP addresses
+- an overlap in IP address range would imply that the interfaces are on the same network
+
+##### Solution
+- the IP addresses of interface R11 and R12 are set and hence this is where we should start - by setting the subnet mask for them
+- since the subnet mask defines which part of the IP represents the network and host address, it needs to be set so that the range of addresses for the network the interface R11 is in doesn't overlap with the range of the addresses for the network the interface R12 is in (and then also the 3rd network present)
+- possible masks:
+	- mask /25 isn't enough as it creates only two ranges:
+		- ```.0``` to ```.127```
+		- ```.128``` to ```.255```
+	- mask /26 (or higher) is more suitable as it creates 4 ranges (including the network and broadcast addresses):
+		- ```.0``` to ```.63``` 
+		- ```.64``` to ```.127``` 
+		- ```.128``` to ```.191``` 
+		- ```.192``` to ```.255``` 
+- lastly, the next-hop fields need to be setup in this way:
+	- each route needs to have the other one's address
+	- each host needs to have the address of the router it is connected to
 </details>
