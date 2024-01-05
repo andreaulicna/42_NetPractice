@@ -198,3 +198,70 @@ Solution:
 	- each route needs to have the other one's address
 	- each host needs to have the address of the router it is connected to
 </details>
+
+<details>
+<summary>Level 8</summary>
+
+##### Theory
+- overlapping IP address as in Level 7
+
+##### Solution
+- set fields that are certain:
+	- internet next-hop is equal to the interface R12's IP address
+	- interface R13's IP address is equal to the set next-hop in the router R2 routing table
+	- subnet mask of interface R23 is equal to the subnet mask of interface D1
+- determine the networks range based on the internet's destination:
+	- the range is between ```159.23.26.0``` and ```159.23.26.63``` (0 is 00000000 in binary and by changing the last 6 bits, we get 00111111 which is 63 in decimal)
+- now we need to split this range into at least 3 parts since there are 3 networks to set IP addresses that cannot overlap for:
+	- router R1 and R2
+		- we need only 2 IP addresses and so the subnet mask can be set to /30
+		- therefore the range (62 = 00111110) is between ```.0011100``` and ```.0111111``` in binary translating to between ```159.23.26.60``` and ```159.23.26.65``` in decimal (except the border addresses)
+	- host D and router R2
+		- the subnet mask is set to ```255.255.255.240``` (/28), and so the last 4 bits will be changing in the IP address, splitting the IP address into 4 parts
+		- to make things easy, we can set the last byte of the IP address to determine the lowest IP range
+		- and so the range will be between ```.00000000``` and ```.00001111``` in binary, translating to between ```159.23.26.0``` and ```159.23.26.15``` in decimal (except the border addresses)
+	- host C and touter R2
+		- here we again need just 2 IP addresses, so the subnet mask can be set to /30
+		- given the lowest range is used for the network of host D and router R2, we can pick up the next available one
+		- that is the range between ```.00010000``` and ```.00010011``` in binary, translating to between ```159.23.26.16``` and ```159.23.26.19``` in decimal (except the border addresses)
+	- the last thing is to set the addresses in the routing tables:
+		- host C:
+			- destination: default
+			- next-hop: interface R22's IP address
+		- host D:
+			- destination: default
+			- next-hop: interface R23's IP address
+		- router R2:
+			- destination: default
+		- internet I:
+			- next-hop: interface R12's IP address (already set as a certain field)
+		- router R1:
+			- the destination and next-hop for the internet are already entered, so these are for router R2:
+				- destination: network address that all the 3 networks in this level are on (which is defined as the destination for the internet I too)
+				- next-hop: interface R21's IP address
+</details>
+
+<details>
+<summary>Level 9</summary>
+
+##### Goal 1
+- set the subnet mask based on the specified mask of interface R11 for all the systems in the network
+- keeping in the original IP address of interface R11, we have a range between ```192.168.172.0``` and ```192.168.172.128``` for this network to use
+- for the routing tables of both, host B and A, we set destination to default and next-hop to the IP address of switch S
+
+##### Goal 2
+- host D - gluon to router:
+	- set the subnet mask of interface D1 to the same one the interface R23 has
+	- the host D routing table specifies the IP address of interface R23
+	- based on that, we can determine the range for this network that is (45 = 00101101) ```28.168.0.0``` to ```28.168.63.255``` (except the border addresses)
+- host C - cation to router:
+	- we can keep in the subnet mask as well as the original IP addresses as we're free to choose them
+- routing tables:
+	- set the destination of host D to default
+
+##### Goal 3
+- one of the destination in the internet I's rounting table needs to be the network address of the network host A - meson is in, that is ```192.168.172.0```, including the subnet mask which is /25
+- one line of the router R1 routing table needs to be filled in as follows:
+	- destination: network address of the network host A - meson (and host B - ion) are in which is ```192.168.172.0```
+	- next-hop: IP address of interface R11
+</details>
