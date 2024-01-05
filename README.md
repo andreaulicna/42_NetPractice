@@ -8,8 +8,6 @@ chmod +rwx [file_name]
 ```
 
 ## Levels
-#### Overall levels notes
-- to convert to binary quickly: 128, 64, 32, 16, 8, 4, 2, 1
 
 <details>
 <summary>Level 1</summary>
@@ -246,7 +244,7 @@ Solution:
 
 ##### Goal 1
 - set the subnet mask based on the specified mask of interface R11 for all the systems in the network
-- keeping in the original IP address of interface R11, we have a range between ```192.168.172.0``` and ```192.168.172.128``` for this network to use
+- keeping in the original IP address of interface R11, we have a range between ```192.168.172.0``` and ```192.168.172.128``` (except border addresses) for this network to use
 - for the routing tables of both, host B and A, we set destination to default and next-hop to the IP address of switch S
 
 ##### Goal 2
@@ -260,8 +258,82 @@ Solution:
 	- set the destination of host D to default
 
 ##### Goal 3
-- one of the destination in the internet I's rounting table needs to be the network address of the network host A - meson is in, that is ```192.168.172.0```, including the subnet mask which is /25
-- one line of the router R1 routing table needs to be filled in as follows:
-	- destination: network address of the network host A - meson (and host B - ion) are in which is ```192.168.172.0```
-	- next-hop: IP address of interface R11
+- one of the destination in the internet I's rounting table needs to be the network address of the network host A - meson is in
+	- that should be ```192.168.172.0/25```, however, it is an address that belongs to a range of reserved private IP ranges that cannot be used when an interface is directly or indirectly connected to the internet
+	- we, therefore, need to change it to an address that is not in those ranges, in all these places:
+		- each system in the network -> host B, host A and switch S
+		- routing table of each host as the next-hop
+		- and only then add it to the routing table of internet I
+
+##### Goal 4 (and Goal 5 as a side effect)
+- setup connection between router R1 and R2 by:
+	- setting the subnet mask of interface R21 to interface R13
+	- keeping the original IP address of the interface R13 and adjusting that of interface R21 to match the conditions for the IP addresses range given by the subnet mask
+	- set a line in routing tables for router R2 and R1 to:
+		- destination: default
+		- next-hop: the IP address of the other router
+- setting one line of router R1's routing table as follows:
+	- destination: network address of host D - gluon, which should end with ```.0.0```
+	- next-hop: IP address of interface R21
+
+##### Goal 6
+- the routing table of internet I needs to contain a line that has the destination set to the network address of the network host C - cation is in:
+	- that should be ```10.0.0.0/24```, but it is an address that belongs to a range of reserved private IP ranges that cannot be used when an interface is directly or indirectly connected to the internet
+	- it, therefore, needs to be changed to an adress that is not those ranges, in all these places:
+		- each system in the network -> host C and interface R22
+		- routing table of host C
+		- and only then add the network address to the routing table of internet I
+
+##### Last touches
+- the routing table of router R1 need to connect:
+	- host C with the internet and therefore needs to have the host C's network address set as destination to a next-hop of interface R21's IP address
+	- host A and host D and therefore needs to have the host D's network address set as destination to a next-hop of interface R21's IP address
+</details>
+
+<details>
+<summary>Level 10</summary>
+
+##### R11-H21-H11 network 
+- set the subnet mask from interface R11 to all other ones
+- calculate the IP range for the network:
+	- 128 = 10000000 and so the last 7 bits can be changed
+	- that gives us the range (1 = 00000001) of ```128.1.26.0``` to ```128.1.26.127``` with mask /25
+- choose an address from that range for interface H21
+
+##### R23-H41 network
+- set the subnet mask from interface H41 to interface R23 too
+- calculate the IP range for the network:
+	- 192 = 11000000 so the last 6 bits can be changed
+	- that gives us the range (131 = 10000011) of ```128.1.26.128``` to ```128.1.26.191``` with mask /26
+- instead of just choosing an address from this range, use the address already specified in the host H4's rounting table for the interface R23's IP address
+
+##### R13-R21 network
+- set the subnet mask (equal to /30) from interface R21 to interface R13 too
+- calculate the IP range for the network:
+	- 252 = 11111100 so the last 2 bits can be changed
+	- that gives us the range (253 = 11111101) of ```128.1.26.252``` to ```128.1.26.255``` with mask /30
+
+##### R22-H31 network
+- let's summarize the IP address ranges used so far to determine a one that can be used for this network:
+```
+128.1.26.0 - 128.1.26.127 with mask /25		# R11-H21-H11
+128.1.26.128 - 128.1.26.191 with mask /26	# R23-H41 
+128.1.26.252 - 128.1.26.255 with mask /30	# R13-H21
+```
+- therefore, there is a range of ```.192``` to ```.251``` that can be used for this network
+- since we need only 2 IP addresses we can use mask /30 with some value from within that range
+- if it the value of 200 (200 = 11001000), the range would be ```.200``` to ```.203```
+- now we can set the next-hop in the routing table of host H3 to the IP address of interface H31
+- and also put the network address of this network, which is ```128.1.26.200```, to the routing table or router R1, including the mask /30
+
+#### Connection to the internet
+- the destination of the internet I's routing table need to cover the IP address ranges of all 4 networks as there is at least one system in each network that needs to be connected to the internet
+- those ranges are:
+```
+128.1.26.0 - 128.1.26.127 with mask /25		# R11-H21-H11
+128.1.26.128 - 128.1.26.191 with mask /26	# R23-H41 
+128.1.26.252 - 128.1.26.255 with mask /30	# R13-H21
+128.1.26.200 - 128.1.26.203 with mask /30	# R22-H31
+```
+- therefore the destination can be set 128.1.26.0/24 which would cover them all
 </details>
