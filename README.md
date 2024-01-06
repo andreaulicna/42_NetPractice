@@ -163,7 +163,7 @@ Solution:
 
 ##### Solution
 - match host A's subnet mask to that of the router
-- get host masks of interface R1: the subnet mask defines that the host address is defined by the last 7 bits (128 = 10000000, 227 = 11100011) and so is between ```.10000000``` and ```.11111111``` in binary translating to ```75.221.134.128``` and ```75.221.134.255``` in decimal, except:
+- get host address of interface R1: the subnet mask defines that the host address is defined by the last 7 bits (128 = 10000000, 227 = 11100011) and so is between ```.10000000``` and ```.11111111``` in binary translating to ```75.221.134.128``` and ```75.221.134.255``` in decimal, except:
 	- ```75.221.134.128```: represents the network address
 	- ```75.221.134.255```: represents the broadcast address
 	- ```75.221.134.227```: already taken by host A 
@@ -187,7 +187,7 @@ Solution:
 	- mask /25 isn't enough as it creates only two ranges:
 		- ```.0``` to ```.127```
 		- ```.128``` to ```.255```
-	- mask /26 (or higher) is more suitable as it creates 4 ranges (including the network and broadcast addresses):
+	- mask /26 (or higher) is more suitable as it creates 4 ranges:
 		- ```.0``` to ```.63``` 
 		- ```.64``` to ```.127``` 
 		- ```.128``` to ```.191``` 
@@ -213,10 +213,10 @@ Solution:
 - now we need to split this range into at least 3 parts since there are 3 networks to set IP addresses that cannot overlap for:
 	- router R1 and R2
 		- we need only 2 IP addresses and so the subnet mask can be set to /30
-		- therefore the range (62 = 00111110) is between ```.0011100``` and ```.0111111``` in binary translating to between ```159.23.26.60``` and ```159.23.26.65``` in decimal (except the border addresses)
+		- therefore the range (62 = 00111110) is between ```.00111100``` and ```.00111111``` in binary translating to between ```159.23.26.60``` and ```159.23.26.63``` in decimal (except the border addresses)
 	- host D and router R2
 		- the subnet mask is set to ```255.255.255.240``` (/28), and so the last 4 bits will be changing in the IP address, splitting the IP address into 4 parts
-		- to make things easy, we can set the last byte of the IP address to determine the lowest IP range
+		- to make things easy, we can set the last byte of the IP address to 0 to determine the lowest IP range
 		- and so the range will be between ```.00000000``` and ```.00001111``` in binary, translating to between ```159.23.26.0``` and ```159.23.26.15``` in decimal (except the border addresses)
 	- host C and touter R2
 		- here we again need just 2 IP addresses, so the subnet mask can be set to /30
