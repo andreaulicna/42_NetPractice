@@ -37,7 +37,7 @@ Solution:
 - the address to change is just that of the host as we are on the same network
 - given that it is the last 2 byte that represents the host address, the solution is any address between ```211.191.0.0``` and ```211.191.255.255``` except:
 	- ```211.191.0.0```: the first number, "0" represents the network
-	-```211.191.255.255```: the last number, "255", is reserved for the broadcast address (used to send information to all the systems on a network)
+	- ```211.191.255.255```: the last number, "255", is reserved for the broadcast address (used to send information to all the systems on a network)
 	- ```211.191.81.75```: already used by host C
 
 </details>
